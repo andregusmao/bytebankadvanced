@@ -4,6 +4,9 @@ import 'package:sqflite/sqflite.dart';
 import '../app_database.dart';
 
 class ContactDao {
+
+  // Constants
+
   static const String _TABLE_CONTACT = 'contacts';
   static const String _COLUMN_ID = 'id';
   static const String _COLUMN_NAME = 'name';
