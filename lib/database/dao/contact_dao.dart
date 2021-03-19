@@ -14,6 +14,8 @@ class ContactDao {
       '$_COLUMN_NAME TEXT, '
       '$_COLUMN_ACCOUNT INTEGER)';
 
+  // Private methods
+
   Future _getList(Database db, List<Contact> contacts) async {
     for (Map<String, dynamic> map in await db.query(_TABLE_CONTACT)) {
       final Contact contact = Contact(
@@ -31,6 +33,8 @@ class ContactDao {
     map[_COLUMN_ACCOUNT] = contact.account;
     return map;
   }
+
+  // Public methods
 
   Future<List<Contact>> findAll() async {
     final Database db = await getDatabase();
