@@ -1,14 +1,11 @@
+import 'package:bytebankadvanced/components/progress.dart';
 import 'package:bytebankadvanced/database/dao/contact_dao.dart';
 import 'package:bytebankadvanced/models/contact.dart';
 import 'package:bytebankadvanced/screens/contacts/form.dart';
+import 'package:bytebankadvanced/screens/transactions/form.dart';
 import 'package:flutter/material.dart';
 
-class ContactsList extends StatefulWidget {
-  @override
-  _ContactState createState() => _ContactState();
-}
-
-class _ContactState extends State {
+class ContactsList extends StatelessWidget {
   final ContactDao _contactDao = ContactDao();
 
   @override
@@ -24,16 +21,7 @@ class _ContactState extends State {
               // TODO: Handle this case.
               break;
             case ConnectionState.waiting:
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    Text('carregando'),
-                  ],
-                ),
-              );
+              return Progress();
               break;
             case ConnectionState.active:
               // TODO: Handle this case.
@@ -54,7 +42,11 @@ class _ContactState extends State {
               return ListView.builder(
                 itemBuilder: (context, index) {
                   final contact = contacts[index];
-                  return ContactItem(contact);
+                  return _ContactItem(contact, onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => TransactionForm(contact)),
+                    );
+                  });
                 },
                 itemCount: contacts.length,
               );
@@ -65,30 +57,30 @@ class _ContactState extends State {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => ContactForm()))
-            .then((value) => setState(() {})),
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => ContactForm())),
         child: Icon(Icons.add),
       ),
     );
   }
 }
 
-class ContactItem extends StatelessWidget {
+class _ContactItem extends StatelessWidget {
   final Contact contact;
+  final Function onTap;
 
-  ContactItem(this.contact);
+  _ContactItem(this.contact, {@required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
+        onTap: this.onTap,
         title: Text(
           contact.name,
           style: TextStyle(fontSize: 24.0),
         ),
         subtitle: Text(
-          contact.account.toString(),
+          contact.accountNumber.toString(),
           style: TextStyle(fontSize: 16.0),
         ),
       ),

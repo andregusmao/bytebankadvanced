@@ -33,7 +33,7 @@ class ContactDao {
   Map<String, dynamic> _getMap(Contact contact) {
     final Map<String, dynamic> map = Map();
     map[_COLUMN_NAME] = contact.name;
-    map[_COLUMN_ACCOUNT] = contact.account;
+    map[_COLUMN_ACCOUNT] = contact.accountNumber;
     return map;
   }
 

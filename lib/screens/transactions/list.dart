@@ -1,55 +1,68 @@
-import 'package:bytebankadvanced/models/contact.dart';
+import 'package:bytebankadvanced/components/centered_message.dart';
+import 'package:bytebankadvanced/components/progress.dart';
+import 'package:bytebankadvanced/http/webclients/transaction_webclient.dart';
+import 'package:bytebankadvanced/models/transaction.dart';
 import 'package:flutter/material.dart';
 
 class TransactionsList extends StatelessWidget {
-  final List<Transaction> transactions = [];
+  final TransactionWebClient _webClient = TransactionWebClient();
 
   @override
   Widget build(BuildContext context) {
-    transactions.add(Transaction(100.0, Contact(0, 'Alex', 1000)));
     return Scaffold(
       appBar: AppBar(
         title: Text('Transações'),
       ),
-      body: ListView.builder(
-        itemBuilder: (context, index) {
-          final Transaction transaction = transactions[index];
-          return Card(
-            child: ListTile(
-              leading: Icon(Icons.monetization_on),
-              title: Text(
-                transaction.value.toString(),
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              subtitle: Text(
-                transaction.contact.account.toString(),
-                style: TextStyle(
-                  fontSize: 16.0,
-                ),
-              ),
-            ),
-          );
+      body: FutureBuilder<List<Transaction>>(
+        future: _webClient.findAll(),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+              // TODO: Handle this case.
+              break;
+            case ConnectionState.waiting:
+              return Progress();
+              break;
+            case ConnectionState.active:
+              // TODO: Handle this case.
+              break;
+            case ConnectionState.done:
+              if (snapshot.hasData) {
+                final List<Transaction> transactions = snapshot.data;
+                if (transactions.isNotEmpty) {
+                  return ListView.builder(
+                    itemBuilder: (context, index) {
+                      final Transaction transaction = transactions[index];
+                      return Card(
+                        child: ListTile(
+                          leading: Icon(Icons.monetization_on),
+                          title: Text(
+                            transaction.value.toString(),
+                            style: TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Text(
+                            transaction.contact.accountNumber.toString(),
+                            style: TextStyle(
+                              fontSize: 16.0,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    itemCount: transactions.length,
+                  );
+                }
+              }
+              return CenteredMessage('Nenhuma transação encontrada');
+              break;
+          }
+
+          return CenteredMessage('Ocorreu um erro');
         },
-        itemCount: transactions.length,
       ),
     );
-  }
-}
-
-class Transaction {
-  final double value;
-  final Contact contact;
-
-  Transaction(
-    this.value,
-    this.contact,
-  );
-
-  @override
-  String toString() {
-    return 'Transaction{value: $value, contact: $contact}';
   }
 }
