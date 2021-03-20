@@ -18,13 +18,11 @@ class TransactionsList extends StatelessWidget {
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
-              // TODO: Handle this case.
               break;
             case ConnectionState.waiting:
               return Progress();
               break;
             case ConnectionState.active:
-              // TODO: Handle this case.
               break;
             case ConnectionState.done:
               if (snapshot.hasData) {
@@ -44,7 +42,7 @@ class TransactionsList extends StatelessWidget {
                             ),
                           ),
                           subtitle: Text(
-                            transaction.contact.accountNumber.toString(),
+                            '${transaction.contact.name} (${transaction.contact.accountNumber})',
                             style: TextStyle(
                               fontSize: 16.0,
                             ),

@@ -18,13 +18,11 @@ class ContactsList extends StatelessWidget {
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
-              // TODO: Handle this case.
               break;
             case ConnectionState.waiting:
               return Progress();
               break;
             case ConnectionState.active:
-              // TODO: Handle this case.
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -37,14 +35,14 @@ class ContactsList extends StatelessWidget {
               );
               break;
             case ConnectionState.done:
-              // TODO: Handle this case.
               final List<Contact> contacts = snapshot.data;
               return ListView.builder(
                 itemBuilder: (context, index) {
                   final contact = contacts[index];
                   return _ContactItem(contact, onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => TransactionForm(contact)),
+                      MaterialPageRoute(
+                          builder: (context) => TransactionForm(contact)),
                     );
                   });
                 },
@@ -57,7 +55,8 @@ class ContactsList extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => ContactForm())),
+        onPressed: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => ContactForm())),
         child: Icon(Icons.add),
       ),
     );
