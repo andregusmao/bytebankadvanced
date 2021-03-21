@@ -6,6 +6,11 @@ import 'package:http/http.dart';
 import '../webclient.dart';
 
 class TransactionWebClient {
+  static final Map<int, String> _statusCodeResponse = {
+    400: 'Ocorreu um erro ao enviar a transferência',
+    401: 'Falha na autenticação'
+  };
+
   Future<List<Transaction>> findAll() async {
     final Response response = await client
         .get(
@@ -17,14 +22,20 @@ class TransactionWebClient {
     return decodedJson.map((dynamic json) => Transaction.fromJson(json)).toList();
   }
 
-  Future<Transaction> save(Transaction transaction) async {
+  Future<Transaction> save(Transaction transaction, String password) async {
     final String transactionJson = jsonEncode(transaction.toJson());
 
-    final Response response = await client
-        .post(Uri.parse('$BASE_URL/transactions'),
-            headers: {'Content-type': 'application/json', 'password': '1000'}, body: transactionJson)
-        .timeout(Duration(seconds: 5));
+    final Response response = await client.post(Uri.parse('$BASE_URL/transactions'),
+        headers: {
+          'Content-type': 'application/json',
+          'password': password,
+        },
+        body: transactionJson);
 
-    return Transaction.fromJson(jsonDecode(response.body));
+    if (response.statusCode == 200) {
+      return Transaction.fromJson(jsonDecode(response.body));
+    }
+
+    throw Exception(_statusCodeResponse[response.statusCode]);
   }
 }
