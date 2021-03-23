@@ -6,5 +6,6 @@ const String BASE_URL = 'http://192.168.15.150:8080';
 
 final Client client = HttpClientWithInterceptor.build(
   interceptors: [LoggingInterceptor()],
+  requestTimeout: Duration(seconds: 5)
 );
 

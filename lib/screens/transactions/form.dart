@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bytebankadvanced/components/response_dialog.dart';
 import 'package:bytebankadvanced/components/transaction_auth_dialog.dart';
 import 'package:bytebankadvanced/http/webclients/transaction_webclient.dart';
@@ -84,14 +86,12 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 
   void _saveTransaction(Transaction transactionCreated, String password, BuildContext context) async {
-    final transaction = await _webClient.save(transactionCreated, password).catchError((error) {
-      showDialog(
-          context: context,
-          builder: (contextDialog) {
-            return FailureDialog(error.message);
-          });
-    }, test: (error) => error is Exception);
+    Transaction transaction = await _sendTransaction(transactionCreated, password, context);
 
+    _showSuccessfulMessage(transaction, context);
+  }
+
+  Future _showSuccessfulMessage(Transaction transaction, BuildContext context) async {
     if (transaction != null) {
       await showDialog(
           context: context,
@@ -100,5 +100,24 @@ class _TransactionFormState extends State<TransactionForm> {
           });
       Navigator.pop(context);
     }
+  }
+
+  Future<Transaction> _sendTransaction(Transaction transactionCreated, String password, BuildContext context) async {
+    final transaction = await _webClient.save(transactionCreated, password).catchError((error) {
+      _showFailureMessage(context, message: error.message);
+    }, test: (error) => error is ApiException).catchError((error) {
+      _showFailureMessage(context, message: 'Tempo de conexão excedido');
+    }, test: (error) => error is TimeoutException).catchError((error) {
+      _showFailureMessage(context);
+    });
+    return transaction;
+  }
+
+  void _showFailureMessage(BuildContext context, {String message = 'Ocorreu um erro desconhecido'}) {
+    showDialog(
+        context: context,
+        builder: (contextDialog) {
+          return FailureDialog(message);
+        });
   }
 }

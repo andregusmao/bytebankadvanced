@@ -7,7 +7,7 @@ import '../webclient.dart';
 
 class TransactionWebClient {
   static final Map<int, String> _statusCodeResponse = {
-    400: 'Ocorreu um erro ao enviar a transferência',
+    400: 'Informações inválidas',
     401: 'Falha na autenticação'
   };
 
@@ -15,8 +15,7 @@ class TransactionWebClient {
     final Response response = await client
         .get(
           Uri.parse('$BASE_URL/transactions'),
-        )
-        .timeout(Duration(seconds: 5));
+        );
 
     final List<dynamic> decodedJson = jsonDecode(response.body);
     return decodedJson.map((dynamic json) => Transaction.fromJson(json)).toList();
@@ -36,6 +35,12 @@ class TransactionWebClient {
       return Transaction.fromJson(jsonDecode(response.body));
     }
 
-    throw Exception(_statusCodeResponse[response.statusCode]);
+    throw ApiException(_statusCodeResponse[response.statusCode]);
   }
+}
+
+class ApiException implements Exception {
+  final String message;
+
+  ApiException(this.message);
 }
