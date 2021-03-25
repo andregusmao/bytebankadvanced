@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:bytebankadvanced/components/progress.dart';
 import 'package:bytebankadvanced/components/response_dialog.dart';
 import 'package:bytebankadvanced/components/transaction_auth_dialog.dart';
 import 'package:bytebankadvanced/http/webclients/transaction_webclient.dart';
 import 'package:bytebankadvanced/models/contact.dart';
 import 'package:bytebankadvanced/models/transaction.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 class TransactionForm extends StatefulWidget {
   final Contact contact;
@@ -19,6 +21,9 @@ class TransactionForm extends StatefulWidget {
 class _TransactionFormState extends State<TransactionForm> {
   final TextEditingController _valueController = TextEditingController();
   final TransactionWebClient _webClient = TransactionWebClient();
+  final String transactionId = Uuid().v4();
+
+  bool _sending = false;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +37,12 @@ class _TransactionFormState extends State<TransactionForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              Visibility(
+                child: Progress(
+                  message: 'enviando transferência...',
+                ),
+                visible: _sending,
+              ),
               Text(
                 widget.contact.name,
                 style: TextStyle(
@@ -65,7 +76,11 @@ class _TransactionFormState extends State<TransactionForm> {
                     child: Text('Transferância'),
                     onPressed: () {
                       final double value = double.tryParse(_valueController.text);
-                      final transactionCreated = Transaction(value, widget.contact);
+                      final transactionCreated = Transaction(
+                        transactionId,
+                        value,
+                        widget.contact,
+                      );
                       showDialog(
                         context: context,
                         builder: (contextDialog) => TransactionAuthDialog(
@@ -86,8 +101,8 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 
   void _saveTransaction(Transaction transactionCreated, String password, BuildContext context) async {
+    setState(() => _sending = true);
     Transaction transaction = await _sendTransaction(transactionCreated, password, context);
-
     _showSuccessfulMessage(transaction, context);
   }
 
@@ -98,7 +113,7 @@ class _TransactionFormState extends State<TransactionForm> {
           builder: (contextDialog) {
             return SuccessDialog('Transação efetuada com sucesso');
           });
-      Navigator.pop(context);
+      Navigator.of(context).pop();
     }
   }
 
@@ -109,7 +124,7 @@ class _TransactionFormState extends State<TransactionForm> {
       _showFailureMessage(context, message: 'Tempo de conexão excedido');
     }, test: (error) => error is TimeoutException).catchError((error) {
       _showFailureMessage(context);
-    });
+    }).whenComplete(() => setState(() => _sending = false));
     return transaction;
   }
 
